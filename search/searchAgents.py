@@ -295,19 +295,14 @@ class CornersProblem(search.SearchProblem):
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        return (self.startingPosition, 0)
+        top, right = self.walls.height-2, self.walls.width-2
+        return (self.startingPosition, ((1,1), (1,top), (right, 1), (right, top)))
 
     def isGoalState(self, state: Any):
         """
         Returns whether this search state is a goal state of the problem.
-        """
-
-        top, right = self.walls.height-2, self.walls.width-2
-        out = state[0] == (1,1) or state[0] == (1,top) or state[0] == (right, 1) or state[0] == (right, top)
-        count = state[1]
-        if out: state = (state[0],count + 1)
-        return out and (count + 1 == 4)
-        
+        """ 
+        return len(state[1]) == 0
 
     def getSuccessors(self, state: Any):
         """
@@ -333,9 +328,11 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty] 
-            print(action) 
             if not hitsWall:
-                successorState = (((nextx,nexty),state[1]),action,1)
+                corn = state[1]
+                if (nextx, nexty) in corn:
+                    corn = tuple(x for x in corn if x != (nextx, nexty))
+                successorState = (((nextx,nexty),corn),action,1)
                 successors.append(successorState)          
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -370,7 +367,7 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
+    
     return 0 # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
