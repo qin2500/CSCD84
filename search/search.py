@@ -108,6 +108,7 @@ def depthFirstSearch(problem: SearchProblem):
             if pos not in visited:
                 dir = neighbour[1]
                 stack.append([pos, path+[dir]])
+    print("No Path Found ;(")
     return []
 
 def breadthFirstSearch(problem: SearchProblem):
