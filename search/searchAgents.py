@@ -42,6 +42,8 @@ import util
 import time
 import search
 import pacman
+import heapq
+import math
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -367,8 +369,14 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
+    curPos = state[0]
+    maxDist = 0
+
+    for corner in state[1]:
+        dist = abs(curPos[0]-corner[0]) + abs(curPos[1] - corner[1])
+        maxDist = max(dist, maxDist)
     
-    return 0 # Default to trivial solution
+    return maxDist
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -397,6 +405,9 @@ class FoodSearchProblem:
 
     def isGoalState(self, state):
         return state[1].count() == 0
+    
+    def getState(self):
+        return self.startingGameState
 
     def getSuccessors(self, state):
         "Returns successor states, the actions they require, and a cost of 1."
@@ -432,6 +443,38 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+
+
+def getMST(foods, player, foodGraph):
+    # Build Graph
+    graph = foodGraph
+    
+
+    graph[player] = []
+    for f in foods:
+        dist = abs(player[0] - f[0]) + abs(player[1] - f[1])
+        graph[player].append((f, dist))
+
+    # get MST
+    totalWeight = 0
+    mst = []
+    visited = set()
+    queue = util.PriorityQueue()
+    queue.push((player, 0), 0)
+    
+    while not queue.isEmpty:
+        node, weight = queue.pop()
+        if node not in visited:
+            visited.add(node)
+            mst.append(node)
+            totalWeight += weight
+        
+        for n, dist in graph[node]:
+            if n not in visited:
+                queue.push((n, dist), dist)
+                
+    return totalWeight
+
 def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -461,8 +504,47 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    # maxDist = float('inf')
+    # for food in foodGrid:
+    #     dist = abs(position[0]-food[0]) + abs(position[1] - food[1])
+    #     maxDist = min(maxDist, dist)
+
+    #Build Graph
+    foods = foodGrid.asList()
+    graph = {}
+    if 'foodGraph' not in problem.heuristicInfo:       
+        
+        for i in range(len(foods)):
+            graph[foods[i]] = []
+
+        for i in range(len(foods)):
+            for j in range(i+1, len(foods)):
+                dist = abs(foods[i][0] - foods[j][0]) + abs(foods[i][1] - foods[j][1])
+                # gameState = problem.getState()
+                # dist = mazeDistance(foods[i], foods[j], gameState)
+                graph[foods[i]].append((foods[j], dist))
+                graph[foods[j]].append((foods[i], dist))
+        problem.heuristicInfo['foodGraph'] = graph
+        problem.heuristicInfo['foods'] = foods
+    else:
+        graph = problem.heuristicInfo['foodGraph']
+    
+    eaten = set(graph.keys()) - set(foods)
+    for food in eaten:
+        for j in graph[food]:
+            if j[0] not in set(graph.keys()):
+                continue
+            for e in graph[j[0]]:
+                if e[0] == food:
+                    graph[j[0]].remove(e)
+        graph.pop(food)
+    problem.heuristicInfo['foodGraph'] = graph
+    # foods = problem.heuristicInfo['foods']
+    mst_weight = getMST(foods, position, graph)
+
+    if len(foods) == 0:
+        return 0
+    return mst_weight
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"

@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -96,7 +97,6 @@ def depthFirstSearch(problem: SearchProblem):
         currentPos = current[0]
         path = current[1]
         if problem.isGoalState(currentPos):
-            print(path)
             return path
         if currentPos in visited:
             continue
@@ -123,7 +123,6 @@ def breadthFirstSearch(problem: SearchProblem):
         currentPos = current[0]
         path = current[1]
         if problem.isGoalState(currentPos):
-            print(path)
             return path
         if currentPos in visited:
             continue
@@ -150,7 +149,6 @@ def uniformCostSearch(problem: SearchProblem):
         path = current[1]
         curCost = current[2]
         if problem.isGoalState(currentPos):
-            print(path)
             return path
         if currentPos in visited:
             continue
@@ -186,7 +184,6 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
         path = current[1]
         curCost = current[2]
         if problem.isGoalState(currentPos):
-            print(path)
             return path
         if currentPos in visited:
             continue
