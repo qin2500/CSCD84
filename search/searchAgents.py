@@ -515,36 +515,37 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     if 'foodGraph' not in problem.heuristicInfo:       
         
         for i in range(len(foods)):
-            graph[foods[i]] = []
+            graph[foods[i]] = {}
 
         for i in range(len(foods)):
             for j in range(i+1, len(foods)):
                 dist = abs(foods[i][0] - foods[j][0]) + abs(foods[i][1] - foods[j][1])
-                # gameState = problem.getState()
-                # dist = mazeDistance(foods[i], foods[j], gameState)
-                graph[foods[i]].append((foods[j], dist))
-                graph[foods[j]].append((foods[i], dist))
+                graph[foods[i]][foods[j]] = dist
+                graph[foods[j]][foods[i]] = dist
         problem.heuristicInfo['foodGraph'] = graph
         problem.heuristicInfo['foods'] = foods
     else:
         graph = problem.heuristicInfo['foodGraph']
     
-    eaten = set(graph.keys()) - set(foods)
-    for food in eaten:
-        for j in graph[food]:
-            if j[0] not in set(graph.keys()):
-                continue
-            for e in graph[j[0]]:
-                if e[0] == food:
-                    graph[j[0]].remove(e)
-        graph.pop(food)
-    problem.heuristicInfo['foodGraph'] = graph
-    # foods = problem.heuristicInfo['foods']
-    mst_weight = getMST(foods, position, graph)
 
-    if len(foods) == 0:
-        return 0
-    return mst_weight
+    min_dist = float('inf')
+    nearest = None
+    for food in foods:
+        dist = abs(food[0] - position[0]) + abs(food[1] - position[1])
+        if dist < min_dist:
+            nearest = food
+            min_dist = dist
+    
+    max_dist = 0
+    furthest = None
+    for food in foods:
+        dist = abs(food[0] - position[0]) + abs(food[1] - position[1])
+        if dist > max_dist:
+            furthest = food
+            max_dist = dist
+    
+
+    return max_dist + min_dist
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
