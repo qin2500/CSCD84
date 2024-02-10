@@ -515,15 +515,13 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     if 'foodGraph' not in problem.heuristicInfo:       
         
         for i in range(len(foods)):
-            graph[foods[i]] = []
+            graph[foods[i]] = {}
 
         for i in range(len(foods)):
             for j in range(i+1, len(foods)):
                 dist = abs(foods[i][0] - foods[j][0]) + abs(foods[i][1] - foods[j][1])
-                # gameState = problem.getState()
-                # dist = mazeDistance(foods[i], foods[j], gameState)
-                graph[foods[i]].append((foods[j], dist))
-                graph[foods[j]].append((foods[i], dist))
+                graph[foods[i]][foods[j]] = dist
+                graph[foods[j]][foods[i]] = dist
         problem.heuristicInfo['foodGraph'] = graph
         problem.heuristicInfo['foods'] = foods
     else:
@@ -545,6 +543,7 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     furthest_dist = max([util.manhattanDistance(nearest_food, food) for food in foods])
     
     return mst_weight/len(foods) + nearest_dist + furthest_dist
+
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
