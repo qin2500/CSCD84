@@ -1,1 +1,3 @@
-# CSCD84_PA1_Search
+# CSCD84_PA
+
+Did you know that the original word for Pac-Man was Puck-Man? You would think it was because he looks like a hockey puck, but it actually comes from the Japanese phrase "Paku-Paku" which means to flap one's mouth open and closed. They changed it because they thought Puck-Man would be too easy to vandalize, you know, like people would scratch off the P and turn it into an F or whatever.
