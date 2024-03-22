@@ -61,8 +61,17 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     def runValueIteration(self):
         # Write value iteration code here
-        "*** YOUR CODE HERE ***"
-
+        for i in range(self.iterations):
+            newValues = util.Counter()
+            states = self.mdp.getStates()
+            for state in states:
+                actions = self.mdp.getPossibleActions(state)
+                if actions:
+                    value = max(self.computeQValueFromValues(state, a) for a in actions)
+                    newValues[state] = value            
+                else:
+                    newValues[state] = 0
+            self.values = newValues
 
     def getValue(self, state):
         """
@@ -76,8 +85,10 @@ class ValueIterationAgent(ValueEstimationAgent):
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        resStates = self.mdp.getTransitionStatesAndProbs(state, action)
+        rewards = [(self.mdp.getReward(state, action, i[0]) + self.discount*self.values[i[0]]) for i in resStates]
+        qValue = sum(map(lambda x, y : x[1] * y, resStates, rewards))
+        return qValue
 
     def computeActionFromValues(self, state):
         """
@@ -88,8 +99,17 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = self.mdp.getPossibleActions(state)
+        if len(actions) == 0:
+            return None
+        
+        qValues = [self.computeQValueFromValues(state, a) for a in actions]
+        maxQ = max(qValues)
+        return actions[qValues.index(maxQ)]      
+
+        
+
+
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
