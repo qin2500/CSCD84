@@ -107,9 +107,6 @@ class ValueIterationAgent(ValueEstimationAgent):
         maxQ = max(qValues)
         return actions[qValues.index(maxQ)]      
 
-        
-
-
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
