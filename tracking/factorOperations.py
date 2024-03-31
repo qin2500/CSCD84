@@ -101,9 +101,23 @@ def joinFactors(factors: List[Factor]):
                     "\n".join(map(str, factors)))
 
 
-    "*** YOUR CODE HERE ***"
-    raiseNotDefined()
-    "*** END YOUR CODE HERE ***"
+    #Get variables
+    conditional = functools.reduce((lambda a, b : a.union(b.conditionedVariables())), factors, set())
+    unconditional = functools.reduce((lambda a, b : a.union(b.unconditionedVariables())), factors, set())
+
+    #Remove unconditional vars from the conditoinal list
+    conditional = conditional - unconditional
+
+    #Create new factor
+    domain = [f.variableDomainsDict() for f in factors]
+    newFactor = Factor(unconditional,conditional, domain[0])
+    for a in newFactor.getAllPossibleAssignmentDicts():
+        ogProbs = [f.getProbability(a) for f in factors]
+        newFactor.setProbability(a, functools.reduce((lambda a, b: a * b), ogProbs, 1))
+
+    return newFactor
+
+
 
 ########### ########### ###########
 ########### QUESTION 3  ###########
@@ -152,9 +166,23 @@ def eliminateWithCallTracking(callTrackingList=None):
                     "eliminationVariable:" + str(eliminationVariable) + "\n" +\
                     "unconditionedVariables: " + str(factor.unconditionedVariables()))
 
-        "*** YOUR CODE HERE ***"
-        raiseNotDefined()
-        "*** END YOUR CODE HERE ***"
+        #Get Variables
+        conditional = factor.conditionedVariables()
+        unconditional = factor.unconditionedVariables()
+
+        #Get rid of eliminated var from unconditional vars
+        unconditional.discard(eliminationVariable)
+        
+        #ELIMINATE THE TARGET
+        variableDomainsDict = factor.variableDomainsDict()
+        domain = variableDomainsDict[eliminationVariable]
+        newFactor = Factor(unconditional, conditional, variableDomainsDict)
+        for a in newFactor.getAllPossibleAssignmentDicts():
+            assigments = [{**a, eliminationVariable: val} for val in domain]
+            prob = sum(factor.getProbability(ass) for ass in assigments)
+            newFactor.setProbability(a, prob)
+
+        return newFactor
 
     return eliminate
 
